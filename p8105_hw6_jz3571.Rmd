@@ -58,6 +58,12 @@ rsquare_df %>%
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
+#### 95% CI for R-squared
+
+```{r}
+quantile(rsquare_df$r.squared, c(0.025, 0.975))
+```
+
 #### Produce estimates of log(beta_0 * beta_1) for each bootstrap sample
 
 ```{r}
@@ -78,6 +84,7 @@ log_df =
   mutate(log_beta0_times_beta1 = log(beta_0 * beta_1))
 ```
 
+
 #### Plot the distribution of estimates of log(beta_0 * beta_1)
 
 ```{r}
@@ -88,5 +95,11 @@ log_df %>%
        y = "Density",
        title = "Distribution of estimates of log(beta_0 * beta_1)") +
   theme(plot.title = element_text(hjust = 0.5))
+```
+
+#### 95% CI for log(beta_0 * beta_1)
+
+```{r}
+quantile(log_df$log_beta0_times_beta1, c(0.025, 0.975))
 ```
 

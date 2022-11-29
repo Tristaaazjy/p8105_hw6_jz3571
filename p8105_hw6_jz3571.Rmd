@@ -30,7 +30,7 @@ weather_df =
   select(name, id, everything())
 ```
 
-#### Draw 5000 bootstrap samples and estimates R-square for each
+#### Draw 5000 bootstrap samples and estimate R-square for each
 ```{r}
 bootstrap_df = 
   weather_df %>% 
@@ -47,7 +47,7 @@ rsquare_df =
 
 ```
 
-#### Plot the distribution of R-square estimates
+#### Plot the distribution of estimated R-square 
 ```{r}
 rsquare_df %>% 
   ggplot(aes(x = r.squared)) +
@@ -55,6 +55,38 @@ rsquare_df %>%
   labs(x = "R_squared estimates",
        y = "Density",
        title = "Distribution of R-squared estimates") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+#### Produce estimates of log(beta_0 * beta_1) for each bootstrap sample
+
+```{r}
+log_df = 
+  bootstrap_df %>% 
+  mutate(
+    models = map(strap, ~ lm(tmax ~ tmin, data = .x)),
+    results = map(models, broom::tidy)
+    ) %>% 
+  unnest(results) %>% 
+  select(strap_number, term, estimate) %>% 
+  pivot_wider(
+    names_from = "term",
+    values_from = "estimate"
+  ) %>% 
+  janitor::clean_names() %>% 
+  rename(beta_0 = intercept, beta_1 = tmin) %>% 
+  mutate(log_beta0_times_beta1 = log(beta_0 * beta_1))
+```
+
+#### Plot the distribution of estimates of log(beta_0 * beta_1)
+
+```{r}
+log_df %>% 
+  ggplot(aes(x = log_beta0_times_beta1)) +
+  geom_density() +
+  labs(x = "log(beta_0 * beta_1)",
+       y = "Density",
+       title = "Distribution of estimates of log(beta_0 * beta_1)") +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 

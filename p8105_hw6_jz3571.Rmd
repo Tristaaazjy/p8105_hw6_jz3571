@@ -302,3 +302,4 @@ cv_df %>%
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
+From the violin plot we can see that my model `stepwise_model` (bwt ~ babysex + bhead + blength + delwt + fincome + gaweeks + mheight + mrace + parity + ppwt + smoken) has the lowest rmse than `model_1` (bwt ~ blength + gaweeks) and `model_2` (bwt ~ bhead * blength * babysex). Therefore, `stepwise_model` has the best performance in predicting birthweight among the three models.

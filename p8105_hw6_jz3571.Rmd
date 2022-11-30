@@ -220,3 +220,23 @@ sum(is.na(bw_clean))
 ```
 
 The resulting dataset `bw_clean` contains 20 variables: babysex, bhead, blength, bwt, delwt, fincome, frace, gaweeks, malform, menarche, mheight, momage, mrace, parity, pnumlbw, pnumsga, ppbmi, ppwt, smoken, wtgain. This dataset has 4342 observations and 0 missing value. Numeric variables `babysex`, `frace`, `malform`, and `mrace` were converted into factor variables. 
+
+#### Propose a regression model for birthweight
+
+###### view the data
+
+```{r}
+bw_clean %>% 
+  lm(bwt ~ ., data =.) %>% 
+  broom::tidy()
+```
+
+###### use the both_way stepwise model selection
+```{r}
+stepwise_model = step(lm(bwt ~ . ,data = bw_clean), direction = "both", trace = FALSE)
+summary(stepwise_model)
+```
+
+According to the results from both_way stepwise model selection , we have the optimal regression model: bwt ~ babysex + bhead + blength + delwt + fincome + gaweeks + mheight + mrace + parity + ppwt + smoken. The multiple r-squared is 0.7181, and adjusted r-squared is 0.7173. The p value is smaller than 2.2e-16.
+
+#### show a plot of model residuals against fitted values

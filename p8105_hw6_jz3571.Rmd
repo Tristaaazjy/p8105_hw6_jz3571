@@ -95,7 +95,10 @@ log_df %>%
        y = "Density",
        title = "Distribution of estimates of log(beta_0 * beta_1)") +
   theme(plot.title = element_text(hjust = 0.5))
+
 ```
+
+From the graphs pf distribution above, we can see the distribution of R square is basically normal and mean is about 0.91. Besides, the the plot of log(beta_0 * beta_1) shows that the value of the value of log(beta_0 * beta_1) is also normally distributed around the 2.03.
 
 #### 95% CI for log(beta_0 * beta_1)
 

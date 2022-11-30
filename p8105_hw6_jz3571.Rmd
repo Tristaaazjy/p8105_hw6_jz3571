@@ -129,3 +129,54 @@ homicide_clean = homicide_df %>%
    select(city_state, resolved, victim_age, victim_race, victim_sex)
 ```
 
+#### Fit a logistic regression for resolved vs unresolved for the city of Baltimore_MD
+
+```{r}
+baltimore_df = 
+  homicide_clean %>% 
+  filter(city_state =="Baltimore_MD") 
+
+glm(resolved ~ victim_age + victim_race + victim_sex, data = baltimore_df) %>% 
+  broom::tidy() %>% 
+  mutate(odd_ratio = exp(estimate),
+         CI_lower = exp(estimate - 1.96*std.error),
+         CI_upper = exp(estimate + 1.96*std.error)) %>% 
+  select(term, odd_ratio, starts_with("CI")) %>% 
+  knitr::kable()
+```
+
+#### Run glm for each of the cities in your dataset, and extract the adjusted odds ratio (and CI) for solving homicides comparing male victims to female victims.
+
+```{r}
+all_glm = 
+  homicide_clean %>% 
+  nest(data = -city_state) %>% 
+  mutate(
+    models = map(.x = data, ~ glm(resolved ~ victim_age + victim_race + victim_sex, data = .x)),
+    results = map(models, broom::tidy)
+    ) %>% 
+  unnest(results) %>% 
+  mutate(odd_ratio = exp(estimate),
+         CI_lower = exp(estimate - 1.96*std.error),
+         CI_upper = exp(estimate + 1.96*std.error)) %>% 
+  select(term, odd_ratio, starts_with("CI"))
+  
+```
+
+#### Plot he estimated ORs and CIs for each city
+
+```{r}
+all_glm %>% 
+  mutate(city_state = fct_reorder(city_state, odd_ratio)) %>% 
+  ggplot(aes(x = city_state, y = odd_ratio)) +
+  geom_point() + 
+  geom_errorbar(aes(ymin = CI_lower, ymax = CI_upper)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(
+    title = "Estimates Odd Ratio and CIs for Each City",
+    x = "City, State",
+    y = "Odd Ratio",
+    caption = "Data from the Washington Post") +
+   theme(plot.title = element_text(hjust = 0.5))
+```
+

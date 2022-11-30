@@ -240,3 +240,65 @@ summary(stepwise_model)
 According to the results from both_way stepwise model selection , we have the optimal regression model: bwt ~ babysex + bhead + blength + delwt + fincome + gaweeks + mheight + mrace + parity + ppwt + smoken. The multiple r-squared is 0.7181, and adjusted r-squared is 0.7173. The p value is smaller than 2.2e-16.
 
 #### show a plot of model residuals against fitted values
+
+```{r}
+residual_plot =
+  bw_clean %>% 
+  add_predictions(stepwise_model) %>% 
+  add_residuals(stepwise_model) %>% 
+  ggplot(aes(x = pred, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(formula = 'y ~ x',method = "lm", se = FALSE) +
+  labs(title = "Fitted Values vs. Residuals",
+       x = "Fitted Values", 
+       y = "Residuals",) +
+  theme(plot.title = element_text(hjust = 0.5))
+  
+```
+
+From the graph, we could see a big cluster of points around fitted values equal 2000 - 4000 where the model residuals tend to evenly distributed around 0. 
+
+#### Compare my model to two others
+
+```{r}
+model_1 = lm(bwt ~ blength + gaweeks, data = bw_clean)
+
+model_2 = lm(bwt ~ bhead * blength * babysex, data = bw_clean)
+
+```
+
+```{r}
+cv_df = 
+  crossv_mc(bw_clean, 100) %>% 
+  mutate(
+    train = map(train, as_tibble),
+    test = map(test, as_tibble)
+  ) %>% 
+  mutate(
+    model_1  = map(train, ~lm(bwt ~ blength + gaweeks, data = .x)),
+    model_2  = map(train, ~lm(bwt ~ bhead * blength * babysex, data = .x)),
+    stepwise_model  = map(train, ~lm(bwt ~ babysex + bhead + blength + delwt + fincome + gaweeks + mheight + mrace + parity + ppwt + smoken, data = .x ))) %>% 
+  mutate(
+    rmse_model_1 = map2_dbl(model_1, test, ~rmse(model = .x, data = .y)),
+    rmse_model_2    = map2_dbl(model_2, test, ~rmse(model = .x, data = .y)),
+    rmse_stepwise = map2_dbl(stepwise_model, test, ~rmse(model = .x, data = .y)))
+```
+
+```{r}
+cv_df %>% 
+  select(starts_with("rmse")) %>% 
+  pivot_longer(
+    everything(),
+    names_to = "model",
+    values_to = "rmse",
+    names_prefix = "rmse_"
+  ) %>% 
+  mutate(model = fct_reorder(model, rmse)) %>% 
+  ggplot(aes(x = model, y = rmse)) +
+  geom_violin() +
+  labs(title = "Cross Validation Comparisons",
+       x = "Model",
+       y = "RMSE") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+

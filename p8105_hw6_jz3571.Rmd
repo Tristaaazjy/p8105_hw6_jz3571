@@ -180,3 +180,43 @@ all_glm %>%
    theme(plot.title = element_text(hjust = 0.5))
 ```
 
+## Problem 3
+
+#### Load and clean the data for regression analysis
+
+```{r}
+birthweight_df = read_csv("./data/birthweight.csv")
+```
+
+```{r}
+bw_clean = 
+  birthweight_df %>% 
+  janitor::clean_names() %>% 
+  mutate(
+    babysex = factor(babysex),
+    babysex = fct_recode(babysex, 
+                         male = "1", 
+                         female = "2"),
+    frace = factor(frace),
+    frace = fct_recode(frace, 
+                       white = "1", 
+                       black = "2", 
+                       asian = "3", 
+                       puerto_rican = "4", 
+                       other = "8"),
+    malform = factor(malform),
+    malform = fct_recode(malform, 
+                         absent = "0", 
+                         present = "1"),
+    mrace = factor(mrace),
+    mrace = fct_recode(mrace, 
+                       white = "1", 
+                       black = "2",
+                       asian = "3",
+                       puerto_rican = "4"))
+
+# check missing values
+sum(is.na(bw_clean))
+```
+
+The resulting dataset `bw_clean` contains 20 variables: babysex, bhead, blength, bwt, delwt, fincome, frace, gaweeks, malform, menarche, mheight, momage, mrace, parity, pnumlbw, pnumsga, ppbmi, ppwt, smoken, wtgain. This dataset has 4342 observations and 0 missing value. Numeric variables `babysex`, `frace`, `malform`, and `mrace` were converted into factor variables. 

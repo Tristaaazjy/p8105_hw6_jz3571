@@ -139,13 +139,13 @@ baltimore_df =
   homicide_clean %>% 
   filter(city_state =="Baltimore_MD") 
 
-glm(resolved ~ victim_age + victim_race + victim_sex, data = baltimore_df) %>% 
+glm(resolved ~ victim_age + victim_race + victim_sex, data = baltimore_df, family = "binomial") %>% 
   broom::tidy() %>% 
   mutate(odd_ratio = exp(estimate),
          CI_lower = exp(estimate - 1.96*std.error),
          CI_upper = exp(estimate + 1.96*std.error)) %>% 
   select(term, odd_ratio, starts_with("CI")) %>% 
-  knitr::kable()
+  knitr::kable(digit = 3)
 ```
 
 #### Run glm for each of the cities in your dataset, and extract the adjusted odds ratio (and CI) for solving homicides comparing male victims to female victims.
@@ -159,11 +159,14 @@ all_glm =
     results = map(models, broom::tidy)
     ) %>% 
   unnest(results) %>% 
+  filter(term == "victim_sexMale") %>% 
   mutate(odd_ratio = exp(estimate),
          CI_lower = exp(estimate - 1.96*std.error),
          CI_upper = exp(estimate + 1.96*std.error)) %>% 
-  select(term, odd_ratio, starts_with("CI"))
+  select(city_state, odd_ratio, starts_with("CI"))
   
+all_glm %>% 
+  knitr::kable(digit = 3)
 ```
 
 #### Plot he estimated ORs and CIs for each city

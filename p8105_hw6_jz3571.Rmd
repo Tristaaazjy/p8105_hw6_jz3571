@@ -155,7 +155,7 @@ all_glm =
   homicide_clean %>% 
   nest(data = -city_state) %>% 
   mutate(
-    models = map(.x = data, ~ glm(resolved ~ victim_age + victim_race + victim_sex, data = .x)),
+    models = map(.x = data, ~ glm(resolved ~ victim_age + victim_race + victim_sex, data = .x, family = "binomial")),
     results = map(models, broom::tidy)
     ) %>% 
   unnest(results) %>% 
